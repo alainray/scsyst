@@ -139,6 +139,9 @@ def assert_dataset_path(path):
         os.makedirs(path)
         print(f"Path {path} does not exist but has been created")
 
+    if not os.path.exists(os.path.join(path, "full")):
+        os.makedirs(os.path.join(path, "full"))
+
     if not os.path.exists(os.path.join(path, "train")):
         os.makedirs(os.path.join(path, "train"))
 
