@@ -65,6 +65,7 @@ def add_new_metrics(hist, new):
 
 def save_model(args, model, best_epoch, logdir="models"):
     logdir = join(logdir, args.dataset)
+    logdir = join(logdir, args.main_task)
     logdir = join(logdir, args.train_method)
     file_path = join(logdir, f'{create_exp_name(args)}/best_model.pth')
     if not exists(join(logdir, f'{create_exp_name(args)}')):
@@ -74,6 +75,7 @@ def save_model(args, model, best_epoch, logdir="models"):
     
 def log_results(args, metrics, split, logdir="results"):
     logdir = join(logdir, args.dataset)
+    logdir = join(logdir, args.main_task)
     logdir = join(logdir, args.train_method)
     df = pd.DataFrame.from_dict(metrics)
 

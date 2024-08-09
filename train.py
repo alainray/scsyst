@@ -6,6 +6,55 @@ from models import get_model
 import torch.optim as optim
 from datasets import create_dataloaders
 
+def run_class_epoch(args, model, data_loader, optimizer = None, train=True):
+    loss_meter = AverageMeter()
+    acc_meter = AverageMeter()
+    criterion = nn.CrossEntropyLoss(reduction="mean")
+    all_feats = []
+    all_reps = []
+    with torch.set_grad_enabled(train):
+        for i, (main_x, _, main_y, _ , shape_y, color_y) in enumerate(data_loader):
+            
+            # Send everything to GPU
+            main_x = main_x.cuda()
+            main_y = main_y.cuda()
+            shape_y = shape_y.cuda()
+            color_y = color_y.cuda()
+            #print("main",main_x.shape, shape_y.shape)
+            # Fix labels depending on training method
+            y = shape_y if args.main_task=="shape" else color_y
+            y = y.view(-1, 1)
+            output, feats, reps = model(main_x)
+            output = output.squeeze()
+            # Calculate metrics
+            preds = output.argmax(dim=1)
+            #print("preds",preds.shape)
+            correct = (preds == y.squeeze()).float()
+            #print("correct",correct.shape)
+            acc = correct.view(-1, 1)
+            #print("acc", acc.shape)
+            n_samples = acc.shape[0]
+            acc = acc.sum(dim=0)
+            #print(acc, n_samples)
+            acc = acc/n_samples
+            #print(acc)
+            # handle per task losses
+            loss = criterion(output, y.squeeze())        # main task
+            #loss = loss.mean()
+            all_feats.append(feats.detach().cpu())
+            all_reps.append(reps.detach().cpu())
+            # Backward pass and optimization
+            if train:                 
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+    metrics = { 'loss': loss.detach().cpu().item()}
+    for i, a in enumerate(acc):
+        metrics[f'acc_{i}'] = 100*a.detach().cpu().item()
+
+    return  model, optimizer, metrics, {'feats': torch.stack(all_feats).squeeze(), 'reps': torch.stack(all_reps).squeeze()}
+
 
 def run_epoch(args, model, data_loader, optimizer = None, train=True):
     loss_meter = AverageMeter()
@@ -69,16 +118,20 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
 
     return  model, optimizer, metrics, {'feats': torch.stack(all_feats).squeeze(), 'reps': torch.stack(all_reps).squeeze()}
 
-
+epoch_method = {'shape': run_class_epoch,
+                'color': run_class_epoch,
+                'sum': run_epoch}
 def save_features_best_model(args, model):
+    epoch_method = {'shape': run_class_epoch,
+                    'color': run_class_epoch,
+                    'sum': run_epoch}
     loaders = create_dataloaders(args)
     for split in args.dataset_parameters.splits:
-        _, _, epoch_metrics, features = run_epoch(args,model, loaders[split], None,
+        _, _, epoch_metrics, features = epoch_method[args.main_task](args,model, loaders[split], None,
                                                 train=False)
         save_features(args, features, split)
 
 def run_experiment(args, print_every=100): # runs experiment based on args, returns information to be logged and best model
-
     best_acc = -10.0
     best_epoch = 0
     set_deterministic(seed=args.seed)
@@ -90,12 +143,12 @@ def run_experiment(args, print_every=100): # runs experiment based on args, retu
     current_metrics = {split: dict() for split in args.dataset_parameters.splits}
     for epoch in range(1,args.epochs+1):
         # Train first
-        model, optimizer, _, _ = run_epoch(args,model, loaders['train'], optimizer,
+        model, optimizer, _, _ = epoch_method[args.main_task](args,model, loaders['train'], optimizer,
                                                         train=True)
         # Evaluate on all splits
 
         for split in args.dataset_parameters.splits:
-            _, _, epoch_metrics, features = run_epoch(args,model, loaders[split], optimizer,
+            _, _, epoch_metrics, features = epoch_method[args.main_task](args,model, loaders[split], optimizer,
                                                         train=False)
             epoch_metrics['epoch'] = epoch
             current_metrics[split] = epoch_metrics
@@ -107,7 +160,6 @@ def run_experiment(args, print_every=100): # runs experiment based on args, retu
             best_epoch = epoch
             best_acc = test_acc
 
-        
         # Print results
         for split in args.dataset_parameters.splits:
             if epoch % print_every == 0:
