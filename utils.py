@@ -41,7 +41,7 @@ def set_deterministic(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 def create_exp_name(args):
-    attributes = ["hidden_dim",'seed']
+    attributes = ["filters","hidden_dim",'seed']
     name = "_".join([str(args[a]) for a in attributes])
     return name    
 
@@ -63,7 +63,15 @@ def add_new_metrics(hist, new):
     return hist
 
 
+def save_model(args, model, best_epoch, logdir="models"):
+    logdir = join(logdir, args.dataset)
+    logdir = join(logdir, args.train_method)
+    file_path = join(logdir, f'{create_exp_name(args)}/best_model.pth')
+    if not exists(join(logdir, f'{create_exp_name(args)}')):
+        os.makedirs(join(logdir, f'{create_exp_name(args)}'))
+    torch.save({'weights': model.state_dict(), 'epoch': best_epoch}, file_path)
 
+    
 def log_results(args, metrics, split, logdir="results"):
     logdir = join(logdir, args.dataset)
     logdir = join(logdir, args.train_method)

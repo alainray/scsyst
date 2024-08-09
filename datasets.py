@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from torchvision.utils import make_grid
 import torchvision.transforms.functional as TF
 from torch.utils.data import DataLoader, TensorDataset, random_split
+from scsyst import SCSyst
 
 def sample_colors_from_span(splits):
     span_lenght = 256
@@ -144,7 +145,18 @@ def plot_dataset( dataset, colors):
     plt.show()
 
 def create_dataloaders(args):
-    splits = args.dataset_parameters['color_splits']
+    if args.dataset == "scsyst":
+        # 
+        SCSyst(split="train")
+        # Create DataLoaders
+        train_dataset = SCSyst(split="train")
+        test_in_dist_dataset = SCSyst(split="test_in_dist")
+        test_out_dist_dataset = SCSyst(split="test_out_dist")
+        train_loader = DataLoader(train_dataset, batch_size=10000, shuffle=False)
+        test_in_dist_loader = DataLoader(test_in_dist_dataset, batch_size=10000, shuffle=False)
+        test_out_dist_loader = DataLoader(test_out_dist_dataset, batch_size=10000, shuffle=False)
+
+    '''splits = args.dataset_parameters['color_splits']
     colors = sample_colors_from_span(splits=splits)
     systematic_colors = sample_colors_from_span(splits=2)
     all([(a == colors).all(-1).any() for a in systematic_colors])
@@ -183,11 +195,7 @@ def create_dataloaders(args):
     test_size = len(dataset) - train_size
     
     # Randomly split the dataset
-    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
+    train_dataset, test_dataset = random_split(dataset, [train_size, test_size])'''
 
-    # Create DataLoaders
-    train_loader = DataLoader(train_dataset, batch_size=100, shuffle=True)
-    val_train_loader = DataLoader(train_dataset, batch_size=100, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=100, shuffle=False)
 
-    return {'train': train_loader, 'val_train': val_train_loader, 'test': test_loader}
+    return {'train': train_loader, 'test_in_dist': test_in_dist_loader, 'test_out_dist': test_out_dist_loader}

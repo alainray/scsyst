@@ -14,7 +14,7 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
     all_feats = []
     all_reps = []
     with torch.set_grad_enabled(train):
-        for i, (main_x, aux_x, main_y, aux_y) in enumerate(data_loader):
+        for i, (main_x, aux_x, main_y, aux_y, *_) in enumerate(data_loader):
             
             # Send everything to GPU
             main_x = main_x.cuda()
@@ -70,46 +70,6 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
     return  model, optimizer, metrics, {'feats': torch.stack(all_feats).squeeze(), 'reps': torch.stack(all_reps).squeeze()}
 
 
-'''def run_epoch(args, model, data_loader, optimizer = None, train=True):
-    loss_meter = AverageMeter()
-    acc_meter = AverageMeter()
-    criterion = nn.MSELoss()
-    all_feats = []
-    all_reps = []
-    with torch.set_grad_enabled(train):
-        for i, (images, ys, *_) in enumerate(data_loader):
-              # depending on the train method is how we deal with input and labels
-              # erm: nothing special
-              # augment: nothing special
-              # multitask: we need to concatenate all ys from all tasks for the criterion, then 
-              # aux_tasks: we need to concatenate all reps, all ys and then apply criterion
-              # supervised aux_tasks: same as aux_tasks but calculate loss from aux_inputs
-              # Forward pass
-              images = images.cuda()
-              ys = ys.cuda()
-              output, feats, reps = model(images)
-              output = output.view(-1, 1) # Doing regression
-              preds = output.round()
-              correct = (preds == ys).float().sum()
-              loss = criterion(output,ys)
-              acc = correct/ys.numel()
-              # if auxiliary tasks add auxiliary losses
-              if args.train_method in ['aux_tasks']:
-                  loss += 0.1
-                  reps
-              all_feats.append(feats.detach().cpu())
-              all_reps.append(reps.detach().cpu())
-              # Backward pass and optimization
-              if train:                 
-                  optimizer.zero_grad()
-                  loss.backward()
-                  optimizer.step()
-    
-    return  model, optimizer, {
-                'loss': loss.detach().cpu().item(),
-                'acc': 100*acc.cpu().item()
-            }, {'feats': torch.stack(all_feats).squeeze(), 'reps': torch.stack(all_reps).squeeze()}
-'''
 def save_features_best_model(args, model):
     loaders = create_dataloaders(args)
     for split in args.dataset_parameters.splits:
@@ -120,6 +80,7 @@ def save_features_best_model(args, model):
 def run_experiment(args, print_every=100): # runs experiment based on args, returns information to be logged and best model
 
     best_acc = -10.0
+    best_epoch = 0
     set_deterministic(seed=args.seed)
     loaders = create_dataloaders(args)
     model = get_model(args).cuda()
@@ -140,15 +101,17 @@ def run_experiment(args, print_every=100): # runs experiment based on args, retu
             current_metrics[split] = epoch_metrics
             full_metrics[split] = add_new_metrics(full_metrics[split], epoch_metrics)
         
-        test_acc = current_metrics['test']['acc_1'] 
+        test_acc = current_metrics['test_out_dist']['acc_0'] 
         if test_acc> best_acc:
             best_model = model
+            best_epoch = epoch
             best_acc = test_acc
-            print(f"Best model achieved! With Acc: {best_acc:.2f}%")
+
         
         # Print results
         for split in args.dataset_parameters.splits:
             if epoch % print_every == 0:
                 pretty_print_metrics(current_metrics)
+                print(f"Best model achieved! With Acc: {best_acc:.2f}%")
 
-    return best_model, full_metrics, features
+    return best_model, best_epoch, full_metrics, features

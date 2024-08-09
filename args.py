@@ -19,13 +19,12 @@ args.log_exp_results = True
 
 args.hidden_dim = 100 # Dimension of final layer of feature extractor.
 args.feature_extractor = "cnn" # cnn / resnet
-args.rep_manipulator = True # False ---> Identity
-args.classifier = "single"
 
 # Training
-args.epochs = 1000
-args.n_seeds = 10
-args.train_method = "tasks" # erm/augmented/tasks/super_reps/aux_tasks
+args.epochs = 10000
+args.filters = 1024 # powers of 2: (16, 32, 64, 128, 256, 512, 1024)
+args.n_seeds = 5
+args.train_method = "erm" # erm/augmented/tasks/super_reps/aux_tasks
 args.n_tasks = 10 # 1 main + 9 auxiliary
 args = update_args(args)
 
@@ -42,7 +41,7 @@ args.dataset_parameters = {'height': 3,
                            'n_colors': 5,
                            'color_splits': 4,
                            'num_repeats': 5,
-                           'splits': ['val_train', 'test'],
+                           'splits': ['train','test_in_dist', 'test_out_dist'],
                            'batch_size': 5000}
 
 args.tasks = ['rotation', 'flipY', 'flipZ']
@@ -50,4 +49,4 @@ args.tasks = ['rotation', 'flipY', 'flipZ']
 # Optimizer
 args.optimizer = "adamw" # "sgd", "adam", "adamw"
 args.lr = 0.001
-args.weight_decay = 1e-3 
+args.weight_decay = 0e-3 

@@ -33,7 +33,7 @@ Simple convolutional feature extractor
 
 class FeatureExtractor(nn.Module):
 
-    def __init__(self, filters=32, output_dim=32, H=3,W=3):
+    def __init__(self, filters=1024, output_dim=32, H=3,W=3):
         super(FeatureExtractor, self).__init__()
         self.H = H
         self.W = W
@@ -119,6 +119,7 @@ class RepresentationManipulator(nn.Module):
 def get_model(args):
         
     feature_extractor = FeatureExtractor(output_dim=args.hidden_dim,
+                                         filters=args.filters,
                                          H=args.dataset_parameters['height'],
                                          W=args.dataset_parameters['width'])
     
