@@ -24,9 +24,10 @@ def swap_channels(img, ch_1, ch_2):
     img[..., [ch_1, ch_2]] = img[..., [ch_2, ch_1]]
     return img
 
-# TODO: FIX THIS FUNCTION
-# def change_color(img, color_list, color_idx):
-#     return np.tile(color_list[color_idx], (img.shape[1], img.shape[2], 1)) * img_shapes[get_shape(img)]
+def change_color(img, color_list, color_idx):
+    # Replace all colored pixels with the new color
+    shape = id_to_shape(get_shape(img))
+    return color_list[color_idx] * shape[:, :, np.newaxis]
 
 # Get the color ID of an image
 def get_color(img, color_list = []):
