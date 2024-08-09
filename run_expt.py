@@ -54,5 +54,5 @@ if __name__ == "__main__":
     # Parse the arguments
     input_args = parser.parse_args()
     args.filters = input_args.n_filters
-    args.hidden_dim = input_args.hidden_dim
+    args.hidden_dim = input_args.hidden_dim 
     run(args)

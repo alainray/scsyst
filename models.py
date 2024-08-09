@@ -122,12 +122,21 @@ def get_model(args):
                                          filters=args.filters,
                                          H=args.dataset_parameters['height'],
                                          W=args.dataset_parameters['width'])
-    
+    output_dim = 1
     if args.train_method in["aux_tasks", "super_reps"]:
         rep_manipulator = RepresentationManipulator(input_dim = 100, N_tasks=10)
     else:
         rep_manipulator = nn.Identity()
-    classifier = MultiHeadClassifier(input_dim = args.hidden_dim, N_tasks = args.n_heads, output_dim=1)
+        
+    if args.main_task in ["shape", "color"]:
+        if args.main_task == "color":
+            output_dim = args.dataset_parameters.n_colors
+        elif args.main_task == "shape":
+            output_dim = args.dataset_parameters.n_shapes
+
+        classifier = MultiHeadClassifier(input_dim = args.hidden_dim, N_tasks = 1, output_dim=output_dim)
+    else:
+        classifier = MultiHeadClassifier(input_dim = args.hidden_dim, N_tasks = args.n_heads, output_dim=output_dim)
 
     return FullModel(feature_extractor=feature_extractor, 
                         rep_manipulator=rep_manipulator,

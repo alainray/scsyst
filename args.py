@@ -27,7 +27,7 @@ args.n_seeds = 5
 args.train_method = "erm" # erm/augmented/tasks/super_reps/aux_tasks
 args.n_tasks = 10 # 1 main + 9 auxiliary
 args = update_args(args)
-
+args.main_task = "color"
 # "erm"   --> standard MSE loss for predicting main task
 # "reps"  --> representation loss, 
 # "tasks" --> loss associated to each auxiliary task
@@ -37,8 +37,8 @@ args.losses = ["erm", "reps", "tasks"]
 args.dataset = "scsyst" 
 args.dataset_parameters = {'height': 3,
                            'width': 3,
-                           'n_shapes': 10, 
-                           'n_colors': 5,
+                           'n_shapes': 36, 
+                           'n_colors': 12,
                            'color_splits': 4,
                            'num_repeats': 5,
                            'splits': ['train','test_in_dist', 'test_out_dist'],
