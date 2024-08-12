@@ -98,8 +98,10 @@ def get_shapes(shape_size, on_pixels = -1):
     if on_pixels != -1:
         shapes = shapes[shapes.sum(axis = (1, 2)) == on_pixels]
 
-    # Return all shapes except the empty one
-    return shapes[1:]
+    # Get shapes with at least one pixel on (not the empty shape)
+    on_shapes = shapes[shapes.sum(axis = (1, 2)) > 0]
+
+    return on_shapes
 
 # Color the shapes with the colors, input must have dimensions N_SHAPES x SHAPE_SIZE x SHAPE_SIZE
 def color_shapes(shapes, colors):

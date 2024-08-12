@@ -26,7 +26,7 @@ ALL_LABELED = True
 
 N_COLORS = 12   # Number of different colors to use for the labels
 SHAPE_SIZE = 3  # Images will have SHAPE_SIZE x SHAPE_SIZE pixels
-ON_PIXELS = 2  # If != -1, only generate images with ON_PIXELS colored pixels
+ON_PIXELS = -1  # If != -1, only generate images with ON_PIXELS colored pixels
 
 # ----------------------------------------------
 
@@ -63,7 +63,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
     colors = get_color_list(N_COLORS, ALL_LABELED)
 
     # Create a dataframe to store the data
-    df_data = {'id': [], 'color': [], 'shape': [], 'set': [],'path': []}
+    df_data = {'color': [], 'shape': [], 'set': [],'path': []}
 
     for transformation in TRANSFORMATIONS.keys():
         df_data[transformation + "_path"] = []
@@ -76,10 +76,10 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
         colored_shapes = color_shapes(shape_new_dim, colors)
 
         for i, img in enumerate(colored_shapes):
-            color, shape = get_label(img, color_list = colors)
+            color_id, shape_id = get_label(img, color_list = colors)
 
             pil_img = Image.fromarray(img)
-            img_path = os.path.join(path, f'full/{shape}_{color}.png')
+            img_path = os.path.join(path, f'full/{shape_id}_{color_id}.png')
             pil_img.save(img_path)
 
     print("Generating datasets, this may take a while...")
@@ -95,7 +95,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
         test_shapes = colored_shapes[n_colors_train:]
 
         for i, img in enumerate(train_shapes):
-            color, shape = get_label(img, color_list = colors)
+            color_id, shape_id = get_label(img, color_list = colors)
 
             for j in range(n_noise_train):
                 noisy_img = add_noise_bg(img, mean = noise_mean, std = noise_std)
@@ -104,9 +104,8 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                 pil_img = Image.fromarray(noisy_img)
                 pil_img.save(img_path)
 
-                df_data['id'].append(idx)
-                df_data['color'].append(color)
-                df_data['shape'].append(shape)
+                df_data['color'].append(color_id)
+                df_data['shape'].append(shape_id)
                 df_data['set'].append('train')
                 df_data['path'].append(img_path)
 
@@ -126,9 +125,8 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['id'].append(idx)
-                    df_data['color'].append(color)
-                    df_data['shape'].append(shape)
+                    df_data['color'].append(color_id)
+                    df_data['shape'].append(shape_id)
                     df_data['set'].append('test_in_dist')
                     df_data['path'].append(img_path)
 
@@ -141,7 +139,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
         if out_distribution:
             for i, img in enumerate(test_shapes):
-                color, shape = get_label(img, color_list = colors)
+                color_id, shape_id = get_label(img, color_list = colors)
 
                 for j in range(n_noise_test):
                     noisy_img = add_noise_bg(img, mean = noise_mean, std = noise_std)
@@ -150,9 +148,8 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['id'].append(idx)
-                    df_data['color'].append(color)
-                    df_data['shape'].append(shape)
+                    df_data['color'].append(color_id)
+                    df_data['shape'].append(shape_id)
                     df_data['set'].append('test_out_dist')
                     df_data['path'].append(img_path)
 
