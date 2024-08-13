@@ -26,7 +26,7 @@ ALL_LABELED = True
 
 N_COLORS = 12   # Number of different colors to use for the labels
 SHAPE_SIZE = 3  # Images will have SHAPE_SIZE x SHAPE_SIZE pixels
-ON_PIXELS = -1  # If != -1, only generate images with ON_PIXELS colored pixels
+ON_PIXELS = 7  # If != -1, only generate images with ON_PIXELS colored pixels
 
 # ----------------------------------------------
 
@@ -63,7 +63,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
     colors = get_color_list(N_COLORS, ALL_LABELED)
 
     # Create a dataframe to store the data
-    df_data = {'color': [], 'shape': [], 'set': [],'path': []}
+    df_data = {'main_color': [], 'main_shape': [], 'set': [],'main_path': []}
 
     for transformation in TRANSFORMATIONS.keys():
         df_data[transformation + "_path"] = []
@@ -104,10 +104,10 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                 pil_img = Image.fromarray(noisy_img)
                 pil_img.save(img_path)
 
-                df_data['color'].append(color_id)
-                df_data['shape'].append(shape_id)
+                df_data['main_color'].append(color_id)
+                df_data['main_shape'].append(shape_id)
                 df_data['set'].append('train')
-                df_data['path'].append(img_path)
+                df_data['main_path'].append(img_path)
 
                 for transformation in TRANSFORMATIONS.keys():
                     img_out = TRANSFORMATIONS[transformation](img)
@@ -125,10 +125,10 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['color'].append(color_id)
-                    df_data['shape'].append(shape_id)
+                    df_data['main_color'].append(color_id)
+                    df_data['main_shape'].append(shape_id)
                     df_data['set'].append('test_in_dist')
-                    df_data['path'].append(img_path)
+                    df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
                         img_out = TRANSFORMATIONS[transformation](img)
@@ -148,10 +148,10 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['color'].append(color_id)
-                    df_data['shape'].append(shape_id)
+                    df_data['main_color'].append(color_id)
+                    df_data['main_shape'].append(shape_id)
                     df_data['set'].append('test_out_dist')
-                    df_data['path'].append(img_path)
+                    df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
                         img_out = TRANSFORMATIONS[transformation](img)
@@ -166,5 +166,5 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
 if __name__ == "__main__":
 
-    generate_datasets(IN_DISTRIBUTION, OUT_DISTRIBUTION)
+    generate_datasets(IN_DISTRIBUTION, OUT_DISTRIBUTION, path="scsyst",noise_std=0)
     print("Dataset generation complete")
