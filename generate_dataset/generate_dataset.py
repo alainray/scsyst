@@ -63,7 +63,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
     colors = get_color_list(N_COLORS, ALL_LABELED)
 
     # Create a dataframe to store the data
-    df_data = {'color': [], 'shape': [], 'set': [],'path': []}
+    df_data = {'main_color': [], 'main_shape': [], 'main_set': [],'main_path': []}
 
     for transformation in TRANSFORMATIONS.keys():
         df_data[transformation + "_path"] = []
@@ -89,10 +89,9 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
         selected_idxs = np.random.choice(range(colors.shape[0]), n_colors_train + n_colors_test, replace = False)
         selected_colors = colors[selected_idxs]
-        colored_shapes = color_shapes(shape_new_dim, selected_colors)
 
-        train_shapes = colored_shapes[:n_colors_train]
-        test_shapes = colored_shapes[n_colors_train:]
+        train_shapes = color_shapes(shape_new_dim, selected_colors[:n_colors_train])
+        test_shapes = color_shapes(shape_new_dim, selected_colors[n_colors_train:])
 
         for i, img in enumerate(train_shapes):
             color_id, shape_id = get_label(img, color_list = colors)
@@ -104,13 +103,14 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                 pil_img = Image.fromarray(noisy_img)
                 pil_img.save(img_path)
 
-                df_data['color'].append(color_id)
-                df_data['shape'].append(shape_id)
-                df_data['set'].append('train')
-                df_data['path'].append(img_path)
+                df_data['main_color'].append(color_id)
+                df_data['main_shape'].append(shape_id)
+                df_data['main_set'].append('train')
+                df_data['main_path'].append(img_path)
 
                 for transformation in TRANSFORMATIONS.keys():
-                    img_out = TRANSFORMATIONS[transformation](img)
+                    transformation_img = img.copy()
+                    img_out = TRANSFORMATIONS[transformation](transformation_img)
                     transformation_color, transformation_shape = get_label(img_out, color_list = colors)
                     df_data[transformation + "_path"].append(os.path.join(path, f'full/{transformation_shape}_{transformation_color}.png'))
                     df_data[transformation + "_shape"].append(transformation_shape)
@@ -125,13 +125,14 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['color'].append(color_id)
-                    df_data['shape'].append(shape_id)
-                    df_data['set'].append('test_in_dist')
-                    df_data['path'].append(img_path)
+                    df_data['main_color'].append(color_id)
+                    df_data['main_shape'].append(shape_id)
+                    df_data['main_set'].append('test_in_dist')
+                    df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
-                        img_out = TRANSFORMATIONS[transformation](img)
+                        transformation_img = img.copy()
+                        img_out = TRANSFORMATIONS[transformation](transformation_img)
                         transformation_color, transformation_shape = get_label(img_out, color_list = colors)
                         df_data[transformation + "_path"].append(os.path.join(path, f'full/{transformation_shape}_{transformation_color}.png'))
                         df_data[transformation + "_shape"].append(transformation_shape)
@@ -148,13 +149,14 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
                     pil_img = Image.fromarray(noisy_img)
                     pil_img.save(img_path)
 
-                    df_data['color'].append(color_id)
-                    df_data['shape'].append(shape_id)
-                    df_data['set'].append('test_out_dist')
-                    df_data['path'].append(img_path)
+                    df_data['main_color'].append(color_id)
+                    df_data['main_shape'].append(shape_id)
+                    df_data['main_set'].append('test_out_dist')
+                    df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
-                        img_out = TRANSFORMATIONS[transformation](img)
+                        transformation_img = img.copy()
+                        img_out = TRANSFORMATIONS[transformation](transformation_img)
                         transformation_color, transformation_shape = get_label(img_out, color_list = colors)
                         df_data[transformation + "_path"].append(os.path.join(path, f'full/{transformation_shape}_{transformation_color}.png'))
                         df_data[transformation + "_shape"].append(transformation_shape)
