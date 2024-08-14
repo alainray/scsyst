@@ -105,7 +105,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
                 df_data['main_color'].append(color_id)
                 df_data['main_shape'].append(shape_id)
-                df_data['main_set'].append('train')
+                df_data['set'].append('train')
                 df_data['main_path'].append(img_path)
 
                 for transformation in TRANSFORMATIONS.keys():
@@ -127,7 +127,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
                     df_data['main_color'].append(color_id)
                     df_data['main_shape'].append(shape_id)
-                    df_data['main_set'].append('test_in_dist')
+                    df_data['set'].append('test_in_dist')
                     df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
@@ -151,7 +151,7 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
                     df_data['main_color'].append(color_id)
                     df_data['main_shape'].append(shape_id)
-                    df_data['main_set'].append('test_out_dist')
+                    df_data['set'].append('test_out_dist')
                     df_data['main_path'].append(img_path)
 
                     for transformation in TRANSFORMATIONS.keys():
