@@ -11,7 +11,7 @@ def update_args(args):
     return args
 
 # Presentation
-args.print_every = 100
+args.print_every = 1
 args.save_best = True
 args.log_exp_results = True
 
@@ -21,13 +21,13 @@ args.hidden_dim = 100 # Dimension of final layer of feature extractor.
 args.feature_extractor = "cnn" # cnn / resnet
 
 # Training
-args.epochs = 10000
+args.epochs = 20000
 args.filters = 1024 # powers of 2: (16, 32, 64, 128, 256, 512, 1024)
-args.n_seeds = 5
+args.n_seeds = 1
 args.train_method = "erm" # erm/augmented/tasks/super_reps/aux_tasks
 args.n_tasks = 10 # 1 main + 9 auxiliary
 args = update_args(args)
-args.main_task = "color"
+args.main_task = "sum"
 # "erm"   --> standard MSE loss for predicting main task
 # "reps"  --> representation loss, 
 # "tasks" --> loss associated to each auxiliary task
@@ -49,4 +49,4 @@ args.tasks = ['rotation', 'flipY', 'flipZ']
 # Optimizer
 args.optimizer = "adamw" # "sgd", "adam", "adamw"
 args.lr = 0.001
-args.weight_decay = 0e-3 
+args.weight_decay = 0.1 

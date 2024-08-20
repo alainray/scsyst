@@ -168,5 +168,5 @@ def generate_datasets(in_distribution = True, out_distribution = True, path = "d
 
 if __name__ == "__main__":
 
-    generate_datasets(IN_DISTRIBUTION, OUT_DISTRIBUTION, path="scsyst",noise_std=0)
+    generate_datasets(IN_DISTRIBUTION, OUT_DISTRIBUTION, path="scsyst",noise_std=10, n_noise_train = 20)
     print("Dataset generation complete")

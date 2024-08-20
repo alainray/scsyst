@@ -4,6 +4,7 @@ import torch.nn as nn
 from utils import AverageMeter, add_new_metrics, pretty_print_metrics, set_deterministic, save_features
 from models import get_model
 import torch.optim as optim
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from datasets import create_dataloaders
 
 def run_class_epoch(args, model, data_loader, optimizer = None, train=True):
@@ -39,6 +40,8 @@ def run_class_epoch(args, model, data_loader, optimizer = None, train=True):
             acc = acc/n_samples
             #print(acc)
             # handle per task losses
+            print(output.shape, y.shape)
+            print(train)
             loss = criterion(output, y.squeeze())        # main task
             #loss = loss.mean()
             all_feats.append(feats.detach().cpu())
@@ -111,6 +114,7 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
+             
 
     metrics = { 'loss': loss.detach().cpu().item()}
     for i, a in enumerate(acc):
@@ -131,14 +135,16 @@ def save_features_best_model(args, model):
                                                 train=False)
         save_features(args, features, split)
 
-def run_experiment(args, print_every=100): # runs experiment based on args, returns information to be logged and best model
+def run_experiment(args): # runs experiment based on args, returns information to be logged and best model
+    print_every=args.print_every
     best_acc = -10.0
     best_epoch = 0
     set_deterministic(seed=args.seed)
     loaders = create_dataloaders(args)
     model = get_model(args).cuda()
     best_model = model
-    optimizer = optim.AdamW(model.parameters(), lr=0.001, weight_decay=0.005)
+    optimizer = optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    scheduler = ReduceLROnPlateau(optimizer, 'min',patience=20,factor=0.5)
     full_metrics = {split: defaultdict(list) for split in args.dataset_parameters.splits}
     current_metrics = {split: dict() for split in args.dataset_parameters.splits}
     for epoch in range(1,args.epochs+1):
@@ -155,6 +161,8 @@ def run_experiment(args, print_every=100): # runs experiment based on args, retu
             full_metrics[split] = add_new_metrics(full_metrics[split], epoch_metrics)
         
         test_acc = current_metrics['test_out_dist']['acc_0'] 
+        train_loss = current_metrics['train']['loss'] 
+        scheduler.step(train_loss)
         if test_acc> best_acc:
             best_model = model
             best_epoch = epoch
@@ -165,5 +173,5 @@ def run_experiment(args, print_every=100): # runs experiment based on args, retu
             if epoch % print_every == 0:
                 pretty_print_metrics(current_metrics)
                 print(f"Best model achieved! With Acc: {best_acc:.2f}%")
-
+                print(f"Current Learning Rate: {scheduler.get_last_lr()}")
     return best_model, best_epoch, full_metrics, features

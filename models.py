@@ -41,11 +41,13 @@ class FeatureExtractor(nn.Module):
         self.relu = nn.ReLU()
         self.flatten = nn.Flatten()
         self.fc1 = nn.Linear(filters, output_dim) 
+        self.fc2 = nn.Linear(output_dim, output_dim)
         
     def forward(self, x):
         x = self.relu(self.conv1(x))
         x = self.flatten(x)
         x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
         return x 
 
 
