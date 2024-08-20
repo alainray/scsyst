@@ -55,6 +55,12 @@ if __name__ == "__main__":
         "--n_seed", 
         type=int, 
         help="index for seed to use", default=0
+    )
+
+    parser.add_argument(
+        "--train_method", 
+        type=str, 
+        help="training method (erm/tasks/super_reps/aux_tasks)", default="erm"
     )  
 
 
@@ -64,4 +70,5 @@ if __name__ == "__main__":
     args.hidden_dim = input_args.hidden_dim 
     args.weight_decay = input_args.weight_decay
     args.n_seed = input_args.n_seed
+    args.train_method = input_args.train_method
     run(args)
