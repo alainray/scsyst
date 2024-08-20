@@ -149,9 +149,9 @@ def create_dataloaders(args):
         # 
         SCSyst(split="train")
         # Create DataLoaders
-        train_dataset = SCSyst(split="train")
-        test_in_dist_dataset = SCSyst(split="test_in_dist")
-        test_out_dist_dataset = SCSyst(split="test_out_dist")
+        train_dataset = SCSyst(split="train",root_path=args.root_path)
+        test_in_dist_dataset = SCSyst(split="test_in_dist",root_path=args.root_path)
+        test_out_dist_dataset = SCSyst(split="test_out_dist",root_path=args.root_path)
         train_loader = DataLoader(train_dataset, batch_size=10000, shuffle=False)
         test_in_dist_loader = DataLoader(test_in_dist_dataset, batch_size=10000, shuffle=False)
         test_out_dist_loader = DataLoader(test_out_dist_dataset, batch_size=10000, shuffle=False)

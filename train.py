@@ -169,9 +169,9 @@ def run_experiment(args): # runs experiment based on args, returns information t
             best_acc = test_acc
 
         # Print results
-        for split in args.dataset_parameters.splits:
-            if epoch % print_every == 0:
-                pretty_print_metrics(current_metrics)
-                print(f"Best model achieved! With Acc: {best_acc:.2f}%")
-                print(f"Current Learning Rate: {scheduler.get_last_lr()}")
+
+        if epoch % print_every == 0:
+            pretty_print_metrics(current_metrics)
+            print(f"Best model achieved! With Acc: {best_acc:.2f}%")
+            print(f"Current Learning Rate: {scheduler.get_last_lr()}")
     return best_model, best_epoch, full_metrics, features
