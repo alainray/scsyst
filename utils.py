@@ -54,7 +54,7 @@ def pretty_print_metrics(data):
 
     for split, metrics in data.items():
         metrics_str = ', '.join(f"{metric}: {value:.2f}" for metric, value in metrics.items())
-        print(f"{split.capitalize()} -> {metrics_str}")
+        print(f"{split.capitalize()} -> {metrics_str}", flush=True)
 
 
 def add_new_metrics(hist, new):
