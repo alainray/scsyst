@@ -28,7 +28,7 @@ def run(args):
     seed_elapsed_time = seed_end_time - seed_start_time
     # save best model
     save_model(args, best_model, best_epoch)
-    print(f"[{i+1}] Elapsed time for seed {seed}: {seed_elapsed_time:.1f} seconds")
+    print(f"Elapsed time for seed {seed}: {seed_elapsed_time:.1f} seconds")
 
 
 if __name__ == "__main__":
