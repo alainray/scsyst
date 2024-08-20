@@ -87,6 +87,7 @@ def log_results(args, metrics, split, logdir="results"):
 
 def save_features(args, features, split, logdir="results"):
     logdir = join(logdir, args.dataset)
+    logdir = join(logdir, args.main_task)
     logdir = join(logdir, args.train_method)
     file_path = join(logdir, f'{create_exp_name(args)}/{split}.pth')
     if not exists(join(logdir, f'{create_exp_name(args)}')):
