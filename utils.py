@@ -63,7 +63,7 @@ def add_new_metrics(hist, new):
     return hist
 
 
-def save_model(args, model, best_epoch, logdir="models"):
+def save_model(args, model, best_epoch, logdir="results"):
     logdir = join(logdir, args.dataset)
     logdir = join(logdir, args.main_task)
     logdir = join(logdir, args.train_method)
@@ -85,7 +85,7 @@ def log_results(args, metrics, split, logdir="results"):
     df.to_csv(csv_file_path, index=False)
 
 
-def save_features(args, features, split, logdir="feats"):
+def save_features(args, features, split, logdir="results"):
     logdir = join(logdir, args.dataset)
     logdir = join(logdir, args.train_method)
     file_path = join(logdir, f'{create_exp_name(args)}/{split}.pth')
