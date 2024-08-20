@@ -34,6 +34,7 @@ args.main_task = "sum"
 args.losses = ["erm", "reps", "tasks"] 
 
 # Dataset 
+args.root_path = "../datasets"
 args.dataset = "scsyst" 
 args.dataset_parameters = {'height': 3,
                            'width': 3,
