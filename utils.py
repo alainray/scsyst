@@ -41,7 +41,7 @@ def set_deterministic(seed=42):
     os.environ['PYTHONHASHSEED'] = str(seed)
 
 def create_exp_name(args):
-    attributes = ["filters","hidden_dim",'seed']
+    attributes = ["filters","hidden_dim","weight_decay",'seed']
     name = "_".join([str(args[a]) for a in attributes])
     return name    
 

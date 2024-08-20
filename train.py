@@ -6,7 +6,7 @@ from models import get_model
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from datasets import create_dataloaders
-
+from scsyst import TRANSFORMATIONS
 def run_class_epoch(args, model, data_loader, optimizer = None, train=True):
     loss_meter = AverageMeter()
     acc_meter = AverageMeter()
@@ -118,7 +118,7 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
 
     metrics = { 'loss': loss.detach().cpu().item()}
     for i, a in enumerate(acc):
-        metrics[f'acc_{i}'] = 100*a.detach().cpu().item()
+        metrics[f'acc_{TRANSFORMATIONS[i]}'] = 100*a.detach().cpu().item()
 
     return  model, optimizer, metrics, {'feats': torch.stack(all_feats).squeeze(), 'reps': torch.stack(all_reps).squeeze()}
 
@@ -160,7 +160,7 @@ def run_experiment(args): # runs experiment based on args, returns information t
             current_metrics[split] = epoch_metrics
             full_metrics[split] = add_new_metrics(full_metrics[split], epoch_metrics)
         
-        test_acc = current_metrics['test_out_dist']['acc_0'] 
+        test_acc = current_metrics['test_out_dist']['acc_main'] 
         train_loss = current_metrics['train']['loss'] 
         scheduler.step(train_loss)
         if test_acc> best_acc:
