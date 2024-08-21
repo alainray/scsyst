@@ -1,4 +1,4 @@
-from args import args
+from args import args, update_args
 from train import run_experiment,save_features_best_model
 from utils import log_results, generate_random_seeds, save_model
 import time
@@ -71,4 +71,6 @@ if __name__ == "__main__":
     args.weight_decay = input_args.weight_decay
     args.n_seed = input_args.n_seed
     args.train_method = input_args.train_method
+
+    args = update_args(args)
     run(args)
