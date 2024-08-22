@@ -33,9 +33,7 @@ class SCSyst(Dataset):
 
 
         # Step 3: Replace the values in the column using the mapping
-        print(self.df['main_shape'][:3])
         self.df['shape_y'] = self.df['main_shape'].map(shape_mapping)
-        print(self.df['shape_y'] [:3])
         self.df['color_y'] = self.df['main_color'].map(color_mapping)
         self.n_shapes = self.df['shape_y'].max()
         self.n_colors = self.df['color_y'].max()
@@ -51,8 +49,8 @@ class SCSyst(Dataset):
             x_task = self.get_images_for_task(task)
             self.x.append(x_task)
             # remap labels according to original labelling
-            self.df[f'{task}_shape_new'] = self.df['main_shape'].map(shape_mapping)
-            self.df[f'{task}_color_new'] = self.df['main_color'].map(color_mapping)
+            self.df[f'{task}_shape_new'] = self.df[f'{task}_shape'].map(shape_mapping)
+            self.df[f'{task}_color_new'] = self.df[f'{task}_color'].map(color_mapping)
             #create_y
             if self.mode == "sum":
                 y_task  = self.df[f'{task}_shape_new'] +  self.df[f'{task}_color_new']
@@ -86,22 +84,22 @@ class SCSyst(Dataset):
     def __getitem__(self,idx):
         return self.x[idx,0], self.x[idx,1:], self.y[idx,0], self.y[idx,1:], self.shapes[idx], self.colors[idx]
     
+if __name__ == "__main__":
+    ds = SCSyst(mode="sum", split="train", root_path="../datasets")
 
-ds = SCSyst(mode="sum", split="train", root_path="../datasets")
+    print(ds.x.shape, ds.y.shape, ds.colors.shape, ds.shapes.shape)
 
-print(ds.x.shape, ds.y.shape, ds.colors.shape, ds.shapes.shape)
-
-print(ds[0][0].shape, ds[0][1].shape,ds[0][2].shape,ds[0][3].shape,ds[0][4].shape,ds[0][5].shape)
+    print(ds[0][0].shape, ds[0][1].shape,ds[0][2].shape,ds[0][3].shape,ds[0][4].shape,ds[0][5].shape)
 
 
-from torch.utils.data import DataLoader
+    from torch.utils.data import DataLoader
 
-dl = DataLoader(ds, batch_size=32)
+    dl = DataLoader(ds, batch_size=32)
 
-a,b,c,d,e,f = next(iter(dl))
+    a,b,c,d,e,f = next(iter(dl))
 
-print(a.shape,b.shape,c.shape,d.shape,e.shape,f.shape)
-print(e)
+    print(a.shape,b.shape,c.shape,d.shape,e.shape,f.shape)
+    print(e)
 
-print(ds.df[['shape_y','color_y']])
+    print(ds.df[['shape_y','color_y']])
 

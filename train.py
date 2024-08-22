@@ -76,9 +76,11 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
 
             # Fix labels depending on training method
             y = main_y
+            #print(y.shape)
             if args.train_method in ["aux_tasks", "tasks", "super_reps"]:
                 y = torch.cat((main_y.unsqueeze(1), aux_y), dim = 1)
             y = y.view(-1, 1)
+            
             output, feats, reps = model(main_x)
             output = output.view(-1,1)
             #print("output", output.shape, y.shape)
@@ -86,6 +88,7 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
             # Calculate metrics
             # handle per task accuracy
             preds = output.round()
+            #print(preds.shape, y.shape)
             correct = (preds == y).float()
             acc = correct.view(-1, args.n_tasks)
             n_samples = acc.shape[0]

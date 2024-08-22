@@ -146,8 +146,6 @@ def plot_dataset( dataset, colors):
 
 def create_dataloaders(args):
     if args.dataset == "scsyst":
-        # 
-        SCSyst(split="train")
         # Create DataLoaders
         train_dataset = SCSyst(split="train",root_path=args.root_path)
         test_in_dist_dataset = SCSyst(split="test_in_dist",root_path=args.root_path)
