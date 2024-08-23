@@ -68,7 +68,7 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
     with torch.set_grad_enabled(train):
         for i, (main_x, aux_x, main_y, aux_y, *_) in enumerate(data_loader):
             task_loss = 0
-            rep_loss = 0
+            rep_loss = torch.tensor(0).cuda()
             # Send everything to GPU
             main_x = main_x.cuda()
             aux_x = aux_x.cuda()
