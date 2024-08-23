@@ -67,7 +67,8 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
     all_reps = []
     with torch.set_grad_enabled(train):
         for i, (main_x, aux_x, main_y, aux_y, *_) in enumerate(data_loader):
-            
+            task_loss = 0
+            rep_loss = 0
             # Send everything to GPU
             main_x = main_x.cuda()
             aux_x = aux_x.cuda()
@@ -77,8 +78,13 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
             # Fix labels depending on training method
             y = main_y
             #print(y.shape)
-            if args.train_method in ["aux_tasks", "tasks", "super_reps"]:
+            if args.train_method in ["augmented", "aux_tasks", "tasks", "super_reps"]:
                 y = torch.cat((main_y.unsqueeze(1), aux_y), dim = 1)
+
+            if args.train_method in ["augmented"]:
+                main_x  = torch.cat((main_x.unsqueeze(1), aux_x), dim=1)
+                _ , _ , c, h, w = main_x.shape
+                main_x = main_x.view(-1, c, h, w)
             y = y.view(-1, 1)
             
             output, feats, reps = model(main_x)
@@ -96,30 +102,33 @@ def run_epoch(args, model, data_loader, optimizer = None, train=True):
             #print(acc, n_samples)
             acc = acc/n_samples
             # handle per task losses
-            loss = criterion(output, y)        # main task
-            loss = loss.view(args.n_tasks,-1)
-            loss = loss.mean(dim=1)
-            loss = loss * args.task_importance # adjust loss per task if required
-            loss = loss.mean()
+            task_loss = criterion(output, y)        # main task
+            task_loss = task_loss.view(args.n_tasks,-1)
+            task_loss = task_loss.mean(dim=1)
+            task_loss = task_loss * args.task_importance # adjust loss per task if required
+            task_loss = task_loss.mean()
             
             # add representation loss if required
             if args.train_method == "super_reps":
                 # add representation losses
+                _ , _ , c, h, w = aux_x.shape
+                aux_x = aux_x.view(-1, c, h, w)
                 _, feats_y, _ = model(aux_x)      # get target reps
                 feats_y = feats_y.view(-1,1)
                 reps = reps[:,1:,:].reshape(-1,1) # use predicted losses
-                rep_loss = criterion(reps, feats_y).view(args.n_tasks-1, -1).mean(dim=1)
-                loss += rep_loss.mean()
+                rep_loss = criterion(reps, feats_y).view(args.n_tasks-1, -1).mean(dim=1).mean()
             all_feats.append(feats.detach().cpu())
             all_reps.append(reps.detach().cpu())
+
+            full_loss = task_loss + rep_loss
             # Backward pass and optimization
             if train:                 
                 optimizer.zero_grad()
-                loss.backward()
+                full_loss.backward()
                 optimizer.step()
              
 
-    metrics = { 'loss': loss.detach().cpu().item()}
+    metrics = { 'task_loss': task_loss.detach().cpu().item(), 'rep_loss': rep_loss.detach().cpu().item()}
     for i, a in enumerate(acc):
         metrics[f'acc_{TRANSFORMATIONS[i]}'] = 100*a.detach().cpu().item()
 
@@ -164,7 +173,7 @@ def run_experiment(args): # runs experiment based on args, returns information t
             full_metrics[split] = add_new_metrics(full_metrics[split], epoch_metrics)
         
         test_acc = current_metrics['test_out_dist']['acc_main'] 
-        train_loss = current_metrics['train']['loss'] 
+        train_loss = current_metrics['train']['task_loss'] 
         scheduler.step(train_loss)
         if test_acc> best_acc:
             best_model = model

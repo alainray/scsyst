@@ -126,7 +126,7 @@ def get_model(args):
                                          W=args.dataset_parameters['width'])
     output_dim = 1
     if args.train_method in["aux_tasks", "super_reps"]:
-        rep_manipulator = RepresentationManipulator(input_dim = 100, N_tasks=10)
+        rep_manipulator = RepresentationManipulator(input_dim = args.hidden_dim, N_tasks=10)
     else:
         rep_manipulator = nn.Identity()
         
